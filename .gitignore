@@ -1,3 +1,13 @@
+# Unused Samples
+HdiNotebooks/
+HdiSamples/
+example/
+
+.amlignore
+.ipynb_aml_checkpoints/ 
+*.amltmp 
+*.amltemp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
