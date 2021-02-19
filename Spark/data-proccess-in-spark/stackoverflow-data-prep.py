@@ -9,6 +9,10 @@ import pyspark
 import os
 import urllib
 import sys
+import pandas as pd
+import numpy as np
+from sklearn.utils import shuffle
+import os
 
 from pyspark.sql.functions import *
 from pyspark.ml.classification import *
@@ -105,10 +109,6 @@ questions.show()
 Step 4: Convert processed data into pandas data frame for final preprocessing and data split
 '''
 
-import pandas as pd
-import numpy as np
-from sklearn.utils import shuffle
-
 df = questions.toPandas()
 
 # drop nan values and remove line breaks
@@ -136,9 +136,9 @@ test = temp[~msk]
 STEP 5: Save dataset into csv and class.txt files
 '''
 
-output_dir = './output'
+output_dir = str(os.path.join(data_dir, 'stackoverflow/output'))
 
-import os
+
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
