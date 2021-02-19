@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from absl import app
-from absl import flags
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license.
 
@@ -38,24 +36,32 @@ print('****************')
 '''
 STEP 1: Download Stack Overflow data from archive. (This takes about 2-3 hours)
 '''
-
-
-# # In[12]:
-
-
 # get_ipython().system('wget https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z')
 # get_ipython().system('sudo apt-get install p7zip-full')
 # get_ipython().system('7z x stackoverflow.com-Posts.7z -oposts')
+
+# Define input arguments
+import sys
+data_dir = sys.argv[1]
+#data_dir = '../../../../../stackoverflow'
+xml_file_path = str(os.path.join(data_dir, 'stackoverflow/posts/Posts.xml'))
+#xml_file_path = 'wasbs://zhenzhuuksouth3632161177.blob.core.windows.net/stackoverflowdata/stackoverflow/posts/Posts.xml'
+print('*******TESTING PATHS FOR DATA*********')
+print(xml_file_path)
+print(os.listdir(str(os.path.join(data_dir, 'stackoverflow'))))
+print('****************')
+
+'''
+STEP 2: Copy data over to databricks file system (This takes about an hour)
+'''
+## TODO Need to figure out how to move data to to a mounted Hadoop Storage for the AML Cluster
+#dbutils.fs.cp(xml_file_path, "dbfs:/tmp/posts/Posts.xml")  
 
 '''
 STEP 3: Process data using Spark
 
 Note - This requires the spark-xml maven library (com.databricks:spark-xml_2.11:0.6.0) to be installed.
 '''
-# Define input arguments
-import sys
-data_dir = sys.argv[1]
-
 import pyspark
 from pyspark.sql import functions as sf
 from pyspark.sql import Row
@@ -63,11 +69,6 @@ from pyspark.sql.functions import size, col, concat_ws, rtrim, regexp_replace, s
 from pyspark.sql.types import ArrayType
 
 # load xml file into spark data frame.
-xml_file_path = str(os.path.join(data_dir, 'Posts.xml'))
-print('****************')
-print(xml_file_path)
-print(os.listdir(data_dir))
-print('****************')
 posts = spark.read.format("xml").option("rowTag", "row").load(xml_file_path)
 
 # select only questions
@@ -100,9 +101,6 @@ questions = questions.select('_Id', 'full_question', '_Tags')
 questions.show()
 
 
-# In[ ]:
-
-
 '''
 Step 4: Convert processed data into pandas data frame for final preprocessing and data split
 '''
@@ -133,10 +131,6 @@ temp = bd[~msk]
 msk = np.random.rand(len(temp)) < 0.66
 valid = temp[msk]
 test = temp[~msk]
-
-
-# In[ ]:
-
 
 '''
 STEP 5: Save dataset into csv and class.txt files

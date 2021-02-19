@@ -28,17 +28,6 @@ print('Python version: {}'.format(sys.version))
 print('Spark version: {}'.format(spark.version))
 print('****************')
 
-# Define input arguments
-import sys
-data_dir = sys.argv[1]
-#data_dir = '../../../../../stackoverflow'
-xml_file_path = str(os.path.join(data_dir, 'Posts.xml'))
-#xml_file_path = str(os.path.join(data_dir, 'posts/Posts.xml'))
-print('*******TESTING PATHS FOR DATA*********')
-print(xml_file_path)
-print(os.listdir(data_dir))
-print('****************')
-
 # load iris.csv into Spark dataframe
 schema = StructType([
     StructField("sepal-length", DoubleType()),
