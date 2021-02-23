@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/mmlspark/release
+FROM mcr.microsoft.com/mmlspark/release:0.15
 
 RUN conda install -y pip=20.1.1 && \
     conda clean -ay && \

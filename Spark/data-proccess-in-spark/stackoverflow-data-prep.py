@@ -27,10 +27,13 @@ from azureml.core.run import Run
 run = Run.get_context()
 
 # start Spark session
+
 spark = pyspark.sql.SparkSession.builder.appName('Stackoverflow') \
-            .config("spark.jars.packages", "com.databricks:spark-xml_2.11:0.6.0") \
-            .config("spark.jars.repositories", "https://mvnrepository.com/artifact/com.databricks/spark-xml") \
-            .getOrCreate()
+             .getOrCreate()
+           # .config("spark.jars.packages", "com.databricks:spark-xml_2.11:0.6.0") \
+           # .config("spark.jars.repositories", "https://mvnrepository.com/artifact/com.databricks/spark-xml") \
+            
+
 
 # print runtime versions
 print('****************')
@@ -122,7 +125,7 @@ bd = pd.read_csv('balanced.csv')
 bd.drop('Unnamed: 0', axis=1, inplace=True)
 
 # shuffle data 
-bd = shuffle(bd)
+# bd = shuffle(bd)
 
 # split data into train, test, and valid sets
 msk = np.random.rand(len(bd)) < 0.7
