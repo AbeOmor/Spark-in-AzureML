@@ -27,45 +27,35 @@ from azureml.core.run import Run
 run = Run.get_context()
 
 # start Spark session
-
-spark = pyspark.sql.SparkSession.builder.appName('Stackoverflow') \
-             .getOrCreate()
-           # .config("spark.jars.packages", "com.databricks:spark-xml_2.11:0.6.0") \
-           # .config("spark.jars.repositories", "https://mvnrepository.com/artifact/com.databricks/spark-xml") \
-            
-
+spark = pyspark.sql.SparkSession.builder.getOrCreate()
+print("Spark session created")
 
 # print runtime versions
+
 print('****************')
 print('Python version: {}'.format(sys.version))
 print('Spark version: {}'.format(spark.version))
+print(os.environ)
 print('****************')
+
 '''
 STEP 1: Download Stack Overflow data from archive. (This takes about 2-3 hours)
 '''
-# get_ipython().system('wget https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z')
-# get_ipython().system('sudo apt-get install p7zip-full')
-# get_ipython().system('7z x stackoverflow.com-Posts.7z -oposts')
 
 # Define input arguments
 import sys
 data_dir = sys.argv[1]
-#data_dir = '../../../../../stackoverflow'
+
 xml_file_path = str(os.path.join(data_dir, 'stackoverflow/posts/Posts.xml'))
-#xml_file_path = 'wasbs://zhenzhuuksouth3632161177.blob.core.windows.net/stackoverflowdata/stackoverflow/posts/Posts.xml'
+
 print('*******TESTING PATHS FOR DATA*********')
 print(xml_file_path)
 print(os.listdir(str(os.path.join(data_dir, 'stackoverflow'))))
 print('****************')
 
-'''
-STEP 2: Copy data over to databricks file system (This takes about an hour)
-'''
-## TODO Need to figure out how to move data to to a mounted Hadoop Storage for the AML Cluster
-#dbutils.fs.cp(xml_file_path, "dbfs:/tmp/posts/Posts.xml")  
 
 '''
-STEP 3: Process data using Spark
+STEP 2: Process data using Spark
 
 Note - This requires the spark-xml maven library (com.databricks:spark-xml_2.11:0.6.0) to be installed.
 '''
@@ -109,7 +99,7 @@ questions.show()
 
 
 '''
-Step 4: Convert processed data into pandas data frame for final preprocessing and data split
+Step 3: Convert processed data into pandas data frame for final preprocessing and data split
 '''
 
 df = questions.toPandas()
@@ -136,10 +126,10 @@ valid = temp[msk]
 test = temp[~msk]
 
 '''
-STEP 5: Save dataset into csv and class.txt files
+STEP 4: Save dataset into csv and class.txt files
 '''
 
-output_dir = str(os.path.join(data_dir, 'stackoverflow/output'))
+output_dir = str(os.path.join(data_dir, 'stackoverflow/output2'))
 
 
 if not os.path.exists(output_dir):
