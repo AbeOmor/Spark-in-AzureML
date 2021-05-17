@@ -1,0 +1,113 @@
+{
+	"name": "Notebook 2",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "abespark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/95a911b6-47f7-4a8b-be9b-c1c2bf56579b/resourceGroups/osomorog/providers/Microsoft.Synapse/workspaces/osomorogsynapse/bigDataPools/abespark",
+				"name": "abespark",
+				"type": "Spark",
+				"endpoint": "https://osomorogsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/abespark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"\r\n",
+					"# This is what is needed for Spark unmounted storage\r\n",
+					"sc._jsc.hadoopConfiguration().set(\"fs.azure.account.key.synapseamlinte5516629025.blob.core.windows.net\", \"cChOi4Ixpu0TYPR/dc9ZHF+p53ZqzP35FpTsnjEywdqn5aNJ5vX0DH/MLS+4INXPyyX7m7Te5bcVCGRPMVIgsQ==\")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from pyspark.sql.functions import col, desc\r\n",
+					"\r\n",
+					"#df = spark.read.option(\"header\", \"true\").csv(\"titanic.csv\")\r\n",
+					"\r\n",
+					"# This is what is needed for unmounted storage\r\n",
+					"df = spark.read.option(\"header\", \"true\").csv(\"wasbs://code-44e6616d-3f26-4ac2-8eec-dacbe7c503e1@synapseamlinte5516629025.blob.core.windows.net/Users/osomorog/titanic.csv\")\r\n",
+					"df.filter(col('Survived') == 1).groupBy('Age').count().orderBy(desc('count')).show(10)"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"microsoft": {
+						"language": "python"
+					}
+				},
+				"source": [
+					"%%pyspark\n",
+					"spark.sql(\"CREATE TABLE IF NOT EXISTS default.testAML USING CSV LOCATION 'wasbs://code-44e6616d-3f26-4ac2-8eec-dacbe7c503e1@synapseamlinte5516629025.blob.core.windows.net/Users/osomorog/titanic.csv'\")"
+				],
+				"execution_count": 5
+			}
+		]
+	}
+}
