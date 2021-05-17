@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--osomorogsynapse",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/95a911b6-47f7-4a8b-be9b-c1c2bf56579b/resourceGroups/osomorog/providers/Microsoft.Synapse/workspaces/osomorogsynapse",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"osomorogsynapse-ondemand.7a02050a-6afe-419d-8afb-a1f624af1d39.sql.azuresynapse.net"
+		]
+	}
+}
