@@ -21,9 +21,6 @@
 		},
 		"metadata": {
 			"saveOutput": true,
-			"synapse_widget": {
-				"version": "0.1"
-			},
 			"kernelspec": {
 				"name": "synapse_pyspark",
 				"display_name": "Synapse PySpark"
@@ -68,7 +65,7 @@
 					"# This is what is needed for Spark unmounted storage\r\n",
 					"sc._jsc.hadoopConfiguration().set(\"fs.azure.account.key.synapseamlinte5516629025.blob.core.windows.net\", \"cChOi4Ixpu0TYPR/dc9ZHF+p53ZqzP35FpTsnjEywdqn5aNJ5vX0DH/MLS+4INXPyyX7m7Te5bcVCGRPMVIgsQ==\")"
 				],
-				"execution_count": 4
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -93,7 +90,7 @@
 					"df = spark.read.option(\"header\", \"true\").csv(\"wasbs://code-44e6616d-3f26-4ac2-8eec-dacbe7c503e1@synapseamlinte5516629025.blob.core.windows.net/Users/osomorog/titanic.csv\")\r\n",
 					"df.filter(col('Survived') == 1).groupBy('Age').count().orderBy(desc('count')).show(10)"
 				],
-				"execution_count": 6
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -103,10 +100,15 @@
 					}
 				},
 				"source": [
-					"%%pyspark\n",
-					"spark.sql(\"CREATE TABLE IF NOT EXISTS default.testAML USING CSV LOCATION 'wasbs://code-44e6616d-3f26-4ac2-8eec-dacbe7c503e1@synapseamlinte5516629025.blob.core.windows.net/Users/osomorog/titanic.csv'\")"
+					"from pyspark import SparkContext\n",
+					"from pyspark.sql import SQLContext, DataFrameWriter\n",
+					"df.write.mode(\"append\").saveAsTable(\"default\")\n",
+					"\n",
+					"# Show new data\n",
+					"result = sqlContext.sql(\"SELECT * from default\")\n",
+					"result.show()"
 				],
-				"execution_count": 5
+				"execution_count": 14
 			}
 		]
 	}
