@@ -1,0 +1,17 @@
+{
+	"name": "AzureDatabricksDeltaLake1",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricksDeltaLake",
+		"typeProperties": {
+			"domain": "https://adb-6825337348262611.11.azuredatabricks.net",
+			"clusterId": "0330-175112-fates476",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIk9TT01PUk9HU1lOQVBTRV9hYjhiYWVhNy0xNDE5LTRkOWEtOGRkZC04NTI0M2FiYmZjNTIiDQp9"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
