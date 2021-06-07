@@ -26,7 +26,7 @@
 			},
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "python"
+				"display_name": "Synapse PySpark"
 			},
 			"language_info": {
 				"name": "python"
@@ -44,16 +44,514 @@
 				"nodeCount": 10,
 				"cores": 8,
 				"memory": 56,
-				"extraHeader": null
-			}
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
 				"source": [
-					""
+					"from azureml.core import Workspace\r\n",
+					"ws = Workspace.get(name='AMLandDBWorkspace', subscription_id='95a911b6-47f7-4a8b-be9b-c1c2bf56579b', resource_group='MLPMetrics')"
 				],
-				"attachments": null,
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# from azureml.core.authentication import InteractiveLoginAuthentication\r\n",
+					"\r\n",
+					"# interactive_auth = InteractiveLoginAuthentication(tenant_id=\"72f988bf-86f1-41af-91ab-2d7cd011db47\")\r\n",
+					"\r\n",
+					"# ws = Workspace(subscription_id=\"95a911b6-47f7-4a8b-be9b-c1c2bf56579b\",\r\n",
+					"#                resource_group=\"MLPMetrics\",\r\n",
+					"#                workspace_name=\"AMLandDBWorkspace\",\r\n",
+					"#                auth=interactive_auth)"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core import LinkedService, SynapseWorkspaceLinkedServiceConfiguration\r\n",
+					"linked_service = LinkedService.get(ws, \"abespark\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azure.storage.blob import BlobClient\r\n",
+					"import os\r\n",
+					"file_name = 'Titanic.csv'\r\n",
+					"\r\n",
+					"blob_client = BlobClient(account_url='https://dprepdata.blob.core.windows.net/', \r\n",
+					"                         container_name = 'demo', \r\n",
+					"                         blob_name = file_name)\r\n",
+					"\r\n",
+					"download_file_path = os.path.join(\"./\", str.replace(file_name ,'.csv', 'DOWNLOAD.csv'))\r\n",
+					"print(\"\\nDownloading blob to \\n\\t\" + download_file_path)\r\n",
+					"\r\n",
+					"with open(download_file_path, \"wb\") as download_file:\r\n",
+					"    download_file.write(blob_client.download_blob().readall())"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"datastore = ws.get_default_datastore()\r\n",
+					"blob_client = BlobClient(account_url='https://{}.blob.core.windows.net/'.format(datastore.account_name), \r\n",
+					"                         container_name = datastore.container_name, \r\n",
+					"                         blob_name = file_name,\r\n",
+					"                         credential = datastore.account_key)\r\n",
+					"    \r\n",
+					"with open(download_file_path, \"rb\") as data:\r\n",
+					"    blob_client.upload_blob(data, overwrite=True)"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core import Dataset\r\n",
+					"titanic_tabular_dataset = Dataset.Tabular.from_delimited_files(path=[(datastore, file_name)])\r\n",
+					"input1 = titanic_tabular_dataset.as_named_input(\"tabular_input\")"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core import Dataset\r\n",
+					"titanic_file_dataset = Dataset.File.from_files(path=[(datastore, file_name)])\r\n",
+					"input2 = titanic_file_dataset.as_named_input(\"file_input\").as_hdfs()"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.data import HDFSOutputDatasetConfig\r\n",
+					"output = HDFSOutputDatasetConfig(destination=(datastore,\"test\")).register_on_complete(name=\"registered_dataset\")"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import os\r\n",
+					"os.makedirs(\"code\", exist_ok=True)"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"%%writefile code/dataprep.py\r\n",
+					"import os\r\n",
+					"import sys\r\n",
+					"import azureml.core\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from azureml.core import Run, Dataset\r\n",
+					"\r\n",
+					"print(azureml.core.VERSION)\r\n",
+					"print(os.environ)\r\n",
+					"\r\n",
+					"import argparse\r\n",
+					"parser = argparse.ArgumentParser()\r\n",
+					"parser.add_argument(\"--tabular_input\")\r\n",
+					"parser.add_argument(\"--file_input\")\r\n",
+					"parser.add_argument(\"--output_dir\")\r\n",
+					"args = parser.parse_args()\r\n",
+					"\r\n",
+					"# use dataset sdk to read tabular dataset\r\n",
+					"run_context = Run.get_context()\r\n",
+					"dataset = Dataset.get_by_id(run_context.experiment.workspace,id=args.tabular_input)\r\n",
+					"sdf = dataset.to_spark_dataframe()\r\n",
+					"sdf.show()\r\n",
+					"\r\n",
+					"# use hdfs path to read file dataset\r\n",
+					"spark= SparkSession.builder.getOrCreate()\r\n",
+					"sdf = spark.read.option(\"header\", \"true\").csv(args.file_input)\r\n",
+					"sdf.show()\r\n",
+					"\r\n",
+					"sdf.coalesce(1).write\\\r\n",
+					".option(\"header\", \"true\")\\\r\n",
+					".mode(\"append\")\\\r\n",
+					".csv(args.output_dir)"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core.environment import CondaDependencies\r\n",
+					"conda_dep = CondaDependencies()\r\n",
+					"conda_dep.add_pip_package(\"azureml-core==1.20.0\")"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"conda = CondaDependencies.create(\r\n",
+					"    pip_indexurl='https://azuremlsdktestpypi.azureedge.net/sdk-release/master/588E708E0DF342C4A80BD954289657CF',\r\n",
+					"    pip_packages=['azureml-sdk<0.1.1', 'azureml-dataprep[fuse,pandas]>=1.1.19', 'azureml-telemetry'],\r\n",
+					"    pin_sdk_version=False\r\n",
+					")"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core import RunConfiguration\r\n",
+					"from azureml.core import ScriptRunConfig \r\n",
+					"from azureml.core import Experiment\r\n",
+					"\r\n",
+					"run_config = RunConfiguration(framework=\"pyspark\")\r\n",
+					"run_config.target = 'abetest'\r\n",
+					"\r\n",
+					"run_config.spark.configuration[\"spark.driver.memory\"] = \"1g\" \r\n",
+					"run_config.spark.configuration[\"spark.driver.cores\"] = 2 \r\n",
+					"run_config.spark.configuration[\"spark.executor.memory\"] = \"1g\" \r\n",
+					"run_config.spark.configuration[\"spark.executor.cores\"] = 1 \r\n",
+					"run_config.spark.configuration[\"spark.executor.instances\"] = 1 \r\n",
+					"\r\n",
+					"run_config.environment.python.conda_dependencies = conda\r\n",
+					"\r\n",
+					"script_run_config = ScriptRunConfig(source_directory = './code',\r\n",
+					"                                    script= 'dataprep.py',\r\n",
+					"                                    arguments = [\"--tabular_input\", input1, \r\n",
+					"                                                 \"--file_input\", input2,\r\n",
+					"                                                 \"--output_dir\", output],\r\n",
+					"                                    run_config = run_config) "
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core import Experiment \r\n",
+					"exp = Experiment(workspace=ws, name=\"IDidThisFromSynapse\") \r\n",
+					"run = exp.submit(config=script_run_config) \r\n",
+					"run"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core.compute import ComputeTarget, AmlCompute\r\n",
+					"from azureml.core.compute_target import ComputeTargetException\r\n",
+					"\r\n",
+					"# Choose a name for your CPU cluster\r\n",
+					"cpu_cluster_name = \"cpucluster\"\r\n",
+					"\r\n",
+					"# Verify that cluster does not exist already\r\n",
+					"try:\r\n",
+					"    cpu_cluster = ComputeTarget(workspace=ws, name=cpu_cluster_name)\r\n",
+					"    print('Found existing cluster, use it.')\r\n",
+					"except ComputeTargetException:\r\n",
+					"    compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_D2_V2',\r\n",
+					"                                                           max_nodes=1)\r\n",
+					"    cpu_cluster = ComputeTarget.create(ws, cpu_cluster_name, compute_config)\r\n",
+					"\r\n",
+					"cpu_cluster.wait_for_completion(show_output=True)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.pipeline.core import Pipeline, PipelineData\r\n",
+					"from azureml.pipeline.steps import PythonScriptStep, SynapseSparkStep\r\n",
+					"from azureml.core.runconfig import RunConfiguration\r\n",
+					"from azureml.core.conda_dependencies import CondaDependencies\r\n",
+					"\r\n",
+					"train_run_config = RunConfiguration()\r\n",
+					"conda = CondaDependencies.create(\r\n",
+					"    pip_indexurl='https://azuremlsdktestpypi.azureedge.net/sdk-release/master/588E708E0DF342C4A80BD954289657CF',\r\n",
+					"    pip_packages=['azureml-sdk<0.1.1', 'azureml-dataprep[fuse,pandas]>=1.1.19', 'azureml-telemetry'],\r\n",
+					"    pin_sdk_version=False\r\n",
+					")\r\n",
+					"\r\n",
+					"train_run_config.environment.python.conda_dependencies = conda"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"%%writefile code/train.py\r\n",
+					"import glob\r\n",
+					"import os\r\n",
+					"import sys\r\n",
+					"from os import listdir\r\n",
+					"from os.path import isfile, join\r\n",
+					"\r\n",
+					"print(sys.argv[0])\r\n",
+					"print(sys.argv[1])\r\n",
+					"for item in os.environ:\r\n",
+					"    print(item)\r\n",
+					"mypath = os.environ[\"step2_input\"]\r\n",
+					"files = [f for f in listdir(mypath) if isfile(join(mypath, f))]\r\n",
+					"for file in files:\r\n",
+					"    with open(join(mypath,file)) as f:\r\n",
+					"        print(f.read())"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"titanic_tabular_dataset = Dataset.Tabular.from_delimited_files(path=[(datastore, file_name)])\r\n",
+					"titanic_file_dataset = Dataset.File.from_files(path=[(datastore, file_name)])\r\n",
+					"\r\n",
+					"step1_input1 = titanic_tabular_dataset.as_named_input(\"tabular_input\")\r\n",
+					"step1_input2 = titanic_file_dataset.as_named_input(\"file_input\").as_hdfs()\r\n",
+					"step1_output = HDFSOutputDatasetConfig(destination=(datastore,\"test\")).register_on_complete(name=\"registered_dataset\")\r\n",
+					"\r\n",
+					"step2_input = step1_output.as_input(\"step2_input\").as_download()\r\n",
+					"\r\n",
+					"\r\n",
+					"from azureml.core.environment import Environment\r\n",
+					"env = Environment(name=\"myenv\")\r\n",
+					"env.python.conda_dependencies.add_pip_package(\"azureml-core==1.20.0\")\r\n",
+					"\r\n",
+					"step_1 = SynapseSparkStep(name = 'synapse-spark',\r\n",
+					"                          file = 'dataprep.py',\r\n",
+					"                          source_directory=\"./code\", \r\n",
+					"                          inputs=[step1_input1, step1_input2],\r\n",
+					"                          outputs=[step1_output],\r\n",
+					"                          arguments = [\"--tabular_input\", step1_input1, \r\n",
+					"                                       \"--file_input\", step1_input2,\r\n",
+					"                                       \"--output_dir\", step1_output],\r\n",
+					"                          compute_target = 'abetest',\r\n",
+					"                          driver_memory = \"7g\",\r\n",
+					"                          driver_cores = 4,\r\n",
+					"                          executor_memory = \"7g\",\r\n",
+					"                          executor_cores = 2,\r\n",
+					"                          num_executors = 1,\r\n",
+					"                          environment = env)\r\n",
+					"\r\n",
+					"step_2 = PythonScriptStep(script_name=\"train.py\",\r\n",
+					"                          arguments=[step2_input],\r\n",
+					"                          inputs=[step2_input],\r\n",
+					"                          compute_target=cpu_cluster_name,\r\n",
+					"                          runconfig = train_run_config,\r\n",
+					"                          source_directory=\"./code\",\r\n",
+					"                          allow_reuse=False)\r\n",
+					"\r\n",
+					"pipeline = Pipeline(workspace=ws, steps=[step_1, step_2])\r\n",
+					"pipeline_run = pipeline.submit('synapse-pipeline', regenerate_outputs=True)"
+				],
 				"execution_count": null
 			}
 		]
