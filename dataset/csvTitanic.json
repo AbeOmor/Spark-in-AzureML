@@ -1,0 +1,23 @@
+{
+	"name": "csvTitanic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SynapseAMLWorkspace",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "titanic.csv",
+				"folderPath": "Users/osomorog",
+				"fileSystem": "code-44e6616d-3f26-4ac2-8eec-dacbe7c503e1"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
