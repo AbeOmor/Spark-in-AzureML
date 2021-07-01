@@ -1,0 +1,21 @@
+{
+	"name": "Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AMLTestLink",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "iris.csv",
+				"folderPath": ".",
+				"container": "code-92b710a7-863d-456e-a56b-7ba3e08e2bf2"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
