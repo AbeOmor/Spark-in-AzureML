@@ -5,11 +5,20 @@
 		"workspaceName": {
 			"value": "osomorogsynapse"
 		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"value": ""
+		},
+		"SynapseAMLWorkspace_accountKey": {
+			"value": ""
+		},
 		"osomorogsynapse-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
 		"AMLTestLink_properties_typeProperties_serviceEndpoint": {
 			"value": "https://amlanddbworksp0569292613.blob.core.windows.net"
+		},
+		"SynapseAMLWorkspace_properties_typeProperties_url": {
+			"value": "https://synapseamlinte5516629025.dfs.core.windows.net"
 		},
 		"osomorogsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://osomoroggen2.dfs.core.windows.net"
