@@ -7,6 +7,9 @@ Create an AML Spark environment with the following:
 * Add the 'numpy' as a conda dependency
 * Add the needed Spark packages and repos
 
+BUG:
+For AzureML-PySpark-MmlSpark-0.15 we need to update the MML Spark container: mcr.microsoft.com/mmlspark/release:0.15
+
 Run this SDK code to register
 ```python
 from azureml.core.environment import Environment
@@ -27,14 +30,17 @@ conda_dep.add_pip_package("pandas")
 # Adds dependencies to PythonSection of myenv
 spark_env.python.conda_dependencies=conda_dep
 
+### BROKEN IN V2 ###
 spark_env.spark.packages = [{"group": "com.databricks","artifact": "spark-xml_2.11","version": "0.6.0"}]
 spark_env.spark.repositories = ["https://mvnrepository.com/artifact/com.databricks/spark-xml"]
+### BROKEN IN V2 ###
 
 spark_env.register(ws)
 ```
 
 ## Coming soon
 * Spark Configurations in v2
+* Adding Spark package and Spark repo support in environments in v2
 * Use Synapse/HDI/Databrick Compute for Spark in v2
 * Data attach as HDFS support in v2
 * Pipeline support for Spark in v2
@@ -88,6 +94,9 @@ script_run_config = ScriptRunConfig(source_directory = './code',
                                                  "--output_dir", output],
                                     run_config = run_config)
 ```
+
+### Spark Env support in v2 for packages and reps
+Coming soon
 
 ### Use Synapse/HDI/Databrick Compute for Spark in v2
 Coming soon
