@@ -40,7 +40,7 @@ spark_env.register(ws)
 
 ## Coming soon
 * Spark Configurations in v2
-* Adding Spark package and Spark repo support in environments in v2
+* Spark package and Spark repo support in environments in v2
 * Use Synapse/HDI/Databrick Compute for Spark in v2
 * Data attach as HDFS support in v2
 * Pipeline support for Spark in v2
@@ -96,6 +96,9 @@ script_run_config = ScriptRunConfig(source_directory = './code',
 ```
 
 ### Spark Env support in v2 for packages and reps
+This will require being able to set the run config to that pyspark framework. So the AML Environment can install need Spark packages
+
+'run_config = RunConfiguration(framework="pyspark")'
 Coming soon
 
 ### Use Synapse/HDI/Databrick Compute for Spark in v2
