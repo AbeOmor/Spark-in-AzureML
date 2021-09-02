@@ -1,0 +1,36 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+code: 
+  local_path: src
+
+# This is the command that will start up the dask cluster and run the script `prep-nyctaxi.py` with the following parameters.
+# For an interactive session, just remove the --script. That will just start the cluster and mount the dataset.
+command: >-
+  python train-spark.py
+#  --nyc_taxi_dataset {inputs.nyc_taxi_dataset} 
+  
+# inputs:
+#   nyc_taxi_dataset:
+#     data: 
+#       path: https://azuremlexamples.blob.core.windows.net/datasets/nyctaxi/
+#     mode: mount
+
+environment: azureml:PySpark-MmlSpark-Alt
+  # conda_file: file:conda.yml
+  # docker: 
+  #   image: mcr.microsoft.com/mmlspark/release
+
+compute:
+  # use a sku with lots of disk space and memory
+  target: azureml:cpu-cluster-ssh
+  instance_count: 1
+
+# distribution:
+#   # The job below is currently launched with `type: pytorch` since that 
+#   # gives the full flexibility of assigning the work to the
+#   # no pytorch is actually used in this job
+#   type: pytorch
+
+experiment_name: spark-iris-example-2
+
+description: This sample shows how to run a spark job on AzureML. 

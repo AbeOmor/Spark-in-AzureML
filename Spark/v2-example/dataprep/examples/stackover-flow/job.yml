@@ -1,0 +1,36 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+code: 
+  local_path: src
+
+command: >-
+  python stackoverflow-data-prep.py
+  --file_input {inputs.stackoverflow_data} 
+
+# inputs:
+#   stackoverflow_data:
+#     data: 
+#       path: https://zhenzhuuksouth3632161177.blob.core.windows.net/stackoverflowdata
+#     mode: mount
+
+inputs:
+  stackoverflow_data:
+    data: 
+      datastore: azureml:stackoverflow_blob
+      path: /stackoverflow/posts/Posts.xml
+    mode: mount
+
+
+environment: azureml:PySpark-MmlSpark-Alt
+
+compute:
+  # use a sku with lots of disk space and memory
+  target: azureml:spark-data-proc
+  instance_count: 1
+
+# environment_variables:
+#     AZUREML_COMPUTE_USE_COMMON_RUNTIME: "true"
+
+experiment_name: data-processing-on-spark-v2
+
+description: This sample shows how to run a titanic spark job on AzureML. 

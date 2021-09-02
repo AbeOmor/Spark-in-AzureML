@@ -23,6 +23,11 @@ from pyspark.sql.types import DoubleType, IntegerType, StringType
 
 from azureml.core.run import Run
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--file_input")
+args = parser.parse_args()
+
 # initialize logger
 run = Run.get_context()
 
@@ -42,15 +47,34 @@ print('****************')
 STEP 1: Download Stack Overflow data from archive. (This takes about 2-3 hours)
 '''
 
-# Define input arguments
-import sys
-data_dir = sys.argv[1]
+####ONLY ADDED FOR the HDFS Path, I can't pass in HDFS with v2
+# from azureml.core import Dataset
+# from azureml.core.datastore import Datastore
+# from azureml.core import Workspace
 
-xml_file_path = str(os.path.join(data_dir, 'stackoverflow/posts/Posts.xml'))
+# from azureml.core.authentication import InteractiveLoginAuthentication
+
+# forced_interactive_auth = InteractiveLoginAuthentication(tenant_id="72f988bf-86f1-41af-91ab-2d7cd011db47", force=True)
+# ws = Workspace.get(
+#     name='zhenzhuuksouth',
+#     subscription_id='e9b2ec51-5c94-4fa8-809a-dc1e695e4896',
+#     resource_group='zhenzhuuksouth',
+#     auth=forced_interactive_auth
+# )
+# def_blob_store = Datastore(ws, "stackoverflow_blob")
+# dataset_ref = Dataset.File.from_files(path=[(def_blob_store, "stackoverflow/posts/Posts.xml")])
+# xml_file_path = dataset_ref.as_hdfs()
+###################
+
+# Define input arguments
+# import sys
+# data_dir = args.file_input
+
+# xml_file_path = str(os.path.join(data_dir, 'stackoverflow/posts/Posts.xml'))
 
 print('*******TESTING PATHS FOR DATA*********')
-print(xml_file_path)
-print(os.listdir(str(os.path.join(data_dir, 'stackoverflow'))))
+# print(xml_file_path)
+# print(os.listdir(str(os.path.join(data_dir,"stackoverflow/posts"))))
 print('****************')
 
 
@@ -66,7 +90,8 @@ from pyspark.sql.functions import size, col, concat_ws, rtrim, regexp_replace, s
 from pyspark.sql.types import ArrayType
 
 # load xml file into spark data frame.
-posts = spark.read.format("xml").option("rowTag", "row").load(xml_file_path)
+#posts = spark.read.format("xml").option("rowTag", "row").load(xml_file_path)
+posts = spark.read.format("com.databricks.spark.xml").option("rowTag", "row").load(args.file_input)
 
 # select only questions
 questions = posts.filter(posts._PostTypeId == 1) 

@@ -1,0 +1,18 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+code: 
+  local_path: src
+
+command: >-
+  python train-spark.py
+
+environment: azureml:PySpark-MmlSpark-Alt
+
+compute:
+  # use a sku with lots of disk space and memory
+  target: azureml:cpu-cluster-ssh
+  instance_count: 1
+
+experiment_name: spark-iris-example
+
+description: This sample shows how to run a spark job on AzureML. 

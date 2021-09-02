@@ -1,0 +1,26 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+code: 
+  local_path: src
+
+command: >-
+  python dataprep.py
+  --file_input {inputs.titanic_file} 
+  --output_dir outputs
+
+inputs:
+  titanic_file:
+    data: 
+      local_path: data/titanic.csv
+    mode: mount
+
+environment: azureml:PySpark-MmlSpark-Alt
+
+compute:
+  # use a sku with lots of disk space and memory
+  target: azureml:cpu-cluster-ssh
+  instance_count: 1
+
+experiment_name: spark-job-reworked
+
+description: This sample shows how to run a titanic spark job on AzureML. 
