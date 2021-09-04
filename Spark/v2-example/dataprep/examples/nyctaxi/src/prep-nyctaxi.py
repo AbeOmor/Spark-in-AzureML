@@ -36,22 +36,22 @@ spark = (
     .config("spark.executor.instances", 1 )
     .getOrCreate())
 
-# Azure storage access info
-blob_account_name = "azureopendatastorage"
-blob_container_name = "nyctlc"
-blob_relative_path = "yellow"
-blob_sas_token = r""
+# # Azure storage access info
+# blob_account_name = "azureopendatastorage"
+# blob_container_name = "nyctlc"
+# blob_relative_path = "yellow"
+# blob_sas_token = r""
 
-# # Allow SPARK to read from Blob remotely
-wasbs_path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (blob_container_name, blob_account_name, blob_relative_path)
-spark.conf.set(
-  'fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name),
-  blob_sas_token)
-print('Remote blob path: ' + wasbs_path)
+# # # Allow SPARK to read from Blob remotely
+# wasbs_path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (blob_container_name, blob_account_name, blob_relative_path)
+# spark.conf.set(
+#   'fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name),
+#   blob_sas_token)
+# print('Remote blob path: ' + wasbs_path)
 
 # SPARK read parquet, note that it won't load any data yet by now
-df = spark.read.parquet(wasbs_path)
-#df = spark.read.parquet(dataset)
+# df = spark.read.parquet(wasbs_path)
+df = spark.read.parquet(dataset)
 df.show()
 
 print(df.head())
@@ -194,14 +194,10 @@ df = df.withColumnRenamed("tpepPickupDateTime","pickupDatetime").withColumnRenam
 taxi_df = clean(df, must_haves, query)
 taxi_df = add_features(taxi_df)
 
-output_path = "./outputs/nyctaxi_processed.parquet"
-print("save parquet to ", output_path)
-
 start_time = time.time()
 
-# make sure that the output_path exists on all nodes of the cluster.
-# See above for how to create it on all cluster nodes.
-taxi_df.to_parquet(output_path)
+output_path = "./outputs/nyctaxi_processed.parquet"
+print("save parquet to ", output_path)
 
 # for debug, show output folders on all nodes
 def list_output():
@@ -220,9 +216,6 @@ mlflow.log_metric("time_saving_seconds", elapsed_time)
 print("done")
 
 os.system("ls -alg " + output_path)
-
-output_path = "./outputs/nyctaxi_processed.parquet"
-print("save parquet to ", output_path)
 
 # make sure that the output_path exists on all nodes of the cluster.
 # See above for how to create it on all cluster nodes.

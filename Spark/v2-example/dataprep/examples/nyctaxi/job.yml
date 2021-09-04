@@ -6,7 +6,6 @@ code:
 command: >-
   python prep-nyctaxi.py
   --nyc_taxi_dataset {inputs.nyc_taxi_dataset} 
-  --output_dir outputs
 
 inputs:
   nyc_taxi_dataset:
