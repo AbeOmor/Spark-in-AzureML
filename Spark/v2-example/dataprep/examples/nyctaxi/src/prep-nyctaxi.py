@@ -52,7 +52,7 @@ spark = (
 # SPARK read parquet, note that it won't load any data yet by now
 # df = spark.read.parquet(wasbs_path)
 df = spark.read.parquet(dataset)
-df.show()
+#df.show()
 
 print(df.head())
 mlflow.log_text(str(df.head()), "df.head")
@@ -199,6 +199,9 @@ start_time = time.time()
 output_path = "./outputs/nyctaxi_processed.parquet"
 print("save parquet to ", output_path)
 
+print(taxi_df.head())
+mlflow.log_text(str(taxi_df.head()), "taxi_df.head")
+
 # for debug, show output folders on all nodes
 def list_output():
     return os.listdir(output_path)
@@ -214,8 +217,6 @@ mlflow.log_metric("time_saving_seconds", elapsed_time)
 #                    storage_options=STORAGE_OPTIONS, engine='pyarrow')
 
 print("done")
-
-os.system("ls -alg " + output_path)
 
 # make sure that the output_path exists on all nodes of the cluster.
 # See above for how to create it on all cluster nodes.
