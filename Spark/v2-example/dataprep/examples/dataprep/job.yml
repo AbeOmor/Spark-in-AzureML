@@ -14,7 +14,10 @@ inputs:
       local_path: data/titanic.csv
     mode: mount
 
-environment: azureml:PySpark-MmlSpark-Alt
+environment: 
+  conda_file: file:conda.yml
+  docker: 
+    image: mcr.microsoft.com/mmlspark/release
 
 compute:
   # use a sku with lots of disk space and memory
