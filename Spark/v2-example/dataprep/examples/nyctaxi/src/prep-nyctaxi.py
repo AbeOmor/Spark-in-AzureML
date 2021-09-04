@@ -128,7 +128,7 @@ from math import pi,cos,sin,sqrt
 import numpy as np
 from pyspark.sql.functions import datediff, to_date, lit
 from pyspark.sql import functions as F
-
+from pyspark.sql.functions import *
 
 def haversine_distance(
     pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude
@@ -147,24 +147,12 @@ def haversine_distance(
 
     return float(c) * r
 
-def day_of_the_week(day, month, year):
-    if month < 3:
-        shift = month
-    else:
-        shift = 0
-    Y = year - (month < 3)
-    y = Y - 2000
-    c = 20
-    d = day
-    m = month + shift + 1
-    return (d + floor(m * 2.6) + y + (y // 4) + (c // 4) - 2 * c) % 7
-
 def add_features(df):
-    df = df.withColumn("hour",df["pickupDatetime"].cast('int'))
-    df = df.withColumn("year",df["pickupDatetime"].cast('int'))
-    df = df.withColumn("month",df["pickupDatetime"].cast('int'))
-    df = df.withColumn("day",df["pickupDatetime"].cast('int'))
-    df = df.withColumn("day_of_week",df["pickupDatetime"].cast('int'))
+    df = df.withColumn("hour",hour(df["pickupDatetime"]).cast('int'))
+    df = df.withColumn("year",year(df["pickupDatetime"]).cast('int'))
+    df = df.withColumn("month",month(df["pickupDatetime"]).cast('int'))
+    df = df.withColumn("day",dayofmonth(df["pickupDatetime"]).cast('int'))
+    df = df.withColumn("day_of_week",dayofweek(df["pickupDatetime"]).cast('int'))
 
     df = df.withColumn("diff",datediff(df["dropoffDatetime"], df["pickupDatetime"]).cast('int'))
 
